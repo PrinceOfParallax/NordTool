@@ -1,0 +1,43 @@
+Add-Type -AssemblyName System.Windows.Forms
+
+# Get all enabled network adapters
+$adapters = Get-NetAdapter | Where-Object Status -eq 'Up'
+
+# Create the form
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "Select Network Adapter for Hyper-V Switch"
+$form.Width = 400
+$form.Height = 150
+
+# Create combo box (dropdown)
+$dropdown = New-Object System.Windows.Forms.ComboBox
+$dropdown.Width = 350
+$dropdown.Location = '20,20'
+$dropdown.Items.AddRange($adapters.Name)
+
+# Pre-select "NordLynx" if it's present
+if ($dropdown.Items.Contains("NordLynx")) {
+    $dropdown.SelectedItem = "NordLynx"
+}
+
+$form.Controls.Add($dropdown)
+
+# Create button
+$button = New-Object System.Windows.Forms.Button
+$button.Text = "Create Virtual Switch"
+$button.Location = '20,60'
+$form.Controls.Add($button)
+
+$button.Add_Click({
+    $switchName = "NordLynxSwitch"
+    $adapterName = $dropdown.SelectedItem
+    if ($adapterName) {
+        New-VMSwitch -Name $switchName -NetAdapterName $adapterName
+        [System.Windows.Forms.MessageBox]::Show("Virtual Switch '$switchName' created on adapter '$adapterName'")
+    } else {
+        [System.Windows.Forms.MessageBox]::Show("No adapter selected!")
+    }
+    $form.Close()
+})
+
+$form.ShowDialog()
