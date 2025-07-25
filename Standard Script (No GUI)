@@ -1,0 +1,15 @@
+# Run as Administrator!
+
+# Variables (adjust switch name if needed)
+$switchName = "NordLynxSwitch"
+$adapterName = "NordLynx" # Adapter name as you specified
+
+# Check if the adapter exists and is up
+$adapter = Get-NetAdapter -Name $adapterName -ErrorAction SilentlyContinue
+if ($adapter -and $adapter.Status -eq 'Up') {
+    # Create the external virtual switch
+    New-VMSwitch -Name $switchName -NetAdapterName $adapterName
+    Write-Output "Created virtual switch '$switchName' bound to adapter '$adapterName'"
+} else {
+    Write-Error "Adapter '$adapterName' is not available or not up. Detected status: $($adapter.Status)"
+}
